@@ -1,0 +1,69 @@
+
+skeleton@2x.png
+size: 1469,609
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+bus_0000s_0000_pas-4
+  rotate: false
+  xy: 1318, 244
+  size: 130, 172
+  orig: 131, 172
+  offset: 0, 0
+  index: -1
+bus_0000s_0001_pas-3
+  rotate: true
+  xy: 1148, 92
+  size: 147, 178
+  orig: 148, 178
+  offset: 0, 0
+  index: -1
+bus_0000s_0002_pas-2
+  rotate: false
+  xy: 1339, 454
+  size: 128, 153
+  orig: 128, 153
+  offset: 0, 0
+  index: -1
+bus_0000s_0003_pas-1
+  rotate: false
+  xy: 1328, 95
+  size: 123, 147
+  orig: 123, 148
+  offset: 0, 1
+  index: -1
+bus_0000s_0004_st-wheel
+  rotate: true
+  xy: 1328, 22
+  size: 71, 75
+  orig: 73, 76
+  offset: 1, 1
+  index: -1
+bus_0000s_0005_driver
+  rotate: false
+  xy: 1148, 241
+  size: 168, 175
+  orig: 168, 176
+  offset: 0, 0
+  index: -1
+bus_0001_wheel_front
+  rotate: false
+  xy: 1148, 418
+  size: 189, 189
+  orig: 189, 189
+  offset: 0, 0
+  index: -1
+bus_0000_wheel_back
+  rotate: false
+  xy: 1148, 418
+  size: 189, 189
+  orig: 189, 189
+  offset: 0, 0
+  index: -1
+bus_0001s_0000_body
+  rotate: false
+  xy: 2, 2
+  size: 1144, 605
+  orig: 1144, 622
+  offset: 0, 17
+  index: -1
