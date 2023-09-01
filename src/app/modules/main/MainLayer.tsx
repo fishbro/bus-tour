@@ -31,8 +31,7 @@ const MainLayer = () => {
     }, [canvasRef, initCanvas]);
 
     const loadSpine = async () => {
-        await PIXI.Assets.load("/images/road_compressed.png").then((resource) => {
-            console.log(resource);
+        await PIXI.Assets.load("/images/road_5.png").then((resource) => {
             road = new PIXI.Sprite(resource);
             road.transform.scale.set(window.innerHeight / road.height);
             const road2 = new PIXI.Sprite(resource);
@@ -58,11 +57,10 @@ const MainLayer = () => {
             anim();
         });
         PIXI.Assets.load("/spine/bus/skeleton.json").then((resource) => {
-            console.log(resource);
             const animation = new Spine(resource.spineData);
+            animation.scale.set(window.innerHeight/animation.height/3);
             animation.x = 320;
-            animation.y = app.renderer.height - 190;
-            animation.scale.set(0.25);
+            animation.y = app.renderer.height - animation.height * 0.9;
             app.stage.addChild(animation);
 
             // // add the animation to the scene and render...
