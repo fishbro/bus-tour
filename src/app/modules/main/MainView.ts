@@ -9,6 +9,7 @@ class MainView {
     private roadHeight = 0;
     private roadContainer: PIXI.Container = new PIXI.Container();
     private busHeight = 0;
+    private busWidth = 0;
     private bus: Spine | null = null;
     private oldTime = 0;
 
@@ -30,6 +31,7 @@ class MainView {
         await PIXI.Assets.load("/spine/bus/skeleton.json").then((resource) => {
             const animation = this.bus = new Spine(resource.spineData);
             this.busHeight = animation.height;
+            this.busWidth = animation.width;
 
             this.symbol.addChild(animation);
         });
@@ -60,8 +62,9 @@ class MainView {
         const {road, bus} = this;
         if (!road || !bus) return;
         road.transform.scale.set(h / this.roadHeight);
-        bus.scale.set(h/this.busHeight/3);
-        bus.y = h - bus.height * .9;
+        const busScale = Math.min(h/3/this.busHeight, w/1.2/this.busWidth);
+        bus.scale.set(busScale);
+        bus.y = h - bus.height * .8;
         bus.x = bus.width / 2;
 
         this.fillRoad(w);
