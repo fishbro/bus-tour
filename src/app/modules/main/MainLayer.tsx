@@ -1,85 +1,65 @@
 'use client';
 
-import React, {useCallback, useEffect, useRef} from 'react';
+import React, {Component} from 'react';
 import * as PIXI from "pixi.js";
-import {Spine} from "pixi-spine";
+import MainView from "@/app/modules/main/MainView";
+import MainStore from "@/app/modules/store/MainStore";
 
-const MainLayer = () => {
-    const canvasRef = useRef(null);
-    let app: PIXI.Application;
-    let road: PIXI.Sprite;
-    let roadContainer: PIXI.Container = new PIXI.Container();
-    let oldTime = 0;
+class MainLayer extends Component<any, any>{
+    private canvasRef: HTMLCanvasElement | null = null;
+    private app: PIXI.Application | null = null;
+    private view: MainView = new MainView();
 
-    const initCanvas = useCallback(() => {
-        if (!canvasRef.current) return;
-        app = new PIXI.Application({ view: canvasRef.current, width: window.innerWidth, height: window.innerHeight });
-
-        window.addEventListener('resize', () => {
-            app.renderer.resize(window.innerWidth, window.innerHeight);
-        });
-
-        loadSpine();
-        // @ts-ignore
-        globalThis.__PIXI_APP__ = app;
-    }, [canvasRef]);
-
-    useEffect(() => {
-        if (canvasRef.current) {
-            initCanvas();
-        }
-    }, [canvasRef, initCanvas]);
-
-    const loadSpine = async () => {
-        await PIXI.Assets.load("/images/road_5.png").then((resource) => {
-            road = new PIXI.Sprite(resource);
-            road.transform.scale.set(window.innerHeight / road.height);
-            const road2 = new PIXI.Sprite(resource);
-            road2.transform.scale.set(road.transform.scale.x);
-            road2.transform.position.x = road.width;
-            roadContainer.addChild(road);
-            roadContainer.addChild(road2);
-
-            app.stage.addChild(roadContainer);
-
-            const anim = () => {
-                requestAnimationFrame((time) => {
-                    roadContainer.transform.position.x = -1*(time - oldTime) / 5;
-
-                    if (roadContainer.transform.position.x < -road.width) {
-                        oldTime = time;
-                    }
-
-                    app.render();
-                    anim();
-                })
-            }
-            anim();
-        });
-        PIXI.Assets.load("/spine/bus/skeleton.json").then((resource) => {
-            const animation = new Spine(resource.spineData);
-            animation.scale.set(window.innerHeight/animation.height/3);
-            animation.x = 320;
-            animation.y = app.renderer.height - animation.height * 0.9;
-            app.stage.addChild(animation);
-
-            // // add the animation to the scene and render...
-            // app.stage.addChild(animation);
-
-            if (animation.state.hasAnimation('drive')) {
-                // run forever, little boy!
-                animation.state.setAnimation(0, 'drive', true);
-                // dont run too fast
-                animation.state.timeScale = 1;
-                // update yourself
-                animation.autoUpdate = true;
-            }
-        });
+    private resize = () => {
+        if (!this.app) return;
+        this.app.renderer.resize(window.innerWidth, window.innerHeight);
+        this.view.resize(this.app.renderer.width, this.app.renderer.height);
     }
 
-    return (
-        <canvas id="pixi-canvas" ref={canvasRef}/>
-    );
-};
+    componentDidMount() {
+        if (!this.canvasRef) return;
+        const app = this.app = new PIXI.Application({ view: this.canvasRef, width: window.innerWidth, height: window.innerHeight });
+        // @ts-ignore
+        globalThis.__PIXI_APP__ = app;
+
+        app.stage.addChild(this.view.symbol);
+        this.anim();
+
+        window.addEventListener('resize', this.resize);
+        MainStore.getInstance().events.on('MainLayer:Load', this.onLoad);
+    }
+
+    componentWillUnmount() {
+        if (!this.app) return;
+        this.app.destroy();
+        this.view.destroy();
+
+        window.removeEventListener('resize', this.resize);
+        MainStore.getInstance().events.off('MainLayer:Load', this.onLoad);
+    }
+
+    private onLoad = () => {
+        const app = this.app;
+        if (!app) return;
+
+        this.view.resize(app.renderer.width, app.renderer.height);
+    }
+
+    anim = () => {
+        const app = this.app;
+        requestAnimationFrame((time) => {
+            if (!app) return;
+            this.view.update(time);
+            app.render();
+            this.anim();
+        })
+    }
+
+    render() {
+        return (
+            <canvas id="pixi-canvas" ref={(el) => this.canvasRef = el}/>
+        );
+    }
+}
 
 export default MainLayer;
