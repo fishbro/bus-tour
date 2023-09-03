@@ -4,6 +4,7 @@ import React, {Component} from 'react';
 import * as PIXI from "pixi.js";
 import MainView from "@/app/modules/main/MainView";
 import MainStore from "@/app/modules/store/MainStore";
+import styles from './main.module.scss';
 
 class MainLayer extends Component<any, any>{
     private canvasRef: HTMLCanvasElement | null = null;
@@ -57,7 +58,9 @@ class MainLayer extends Component<any, any>{
 
     render() {
         return (
-            <canvas id="pixi-canvas" ref={(el) => this.canvasRef = el}/>
+            <div className={styles.mainLayer}>
+                <canvas id="pixi-canvas" ref={(el) => this.canvasRef = el}/>
+            </div>
         );
     }
 }
