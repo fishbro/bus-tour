@@ -12,11 +12,16 @@ class MainView {
     private busWidth = 0;
     private bus: Spine | null = null;
     private oldTime = 0;
+    private isDriving = false;
 
     constructor() {
         this.symbol.name = "MainView";
         this.load().then(() => {
-            this.init();
+            this.idle();
+            MainStore.getInstance().events.on(
+                "Place:setViewState",
+                this.setViewState
+            );
         });
     }
 
@@ -38,7 +43,17 @@ class MainView {
         MainStore.getInstance().events.emit("MainLayer:Load");
     }
 
-    private init() {
+    private idle = () => {
+        const animation = this.bus;
+        if (!animation) return;
+        if (animation.state.hasAnimation("idle")) {
+            animation.state.setAnimation(0, "idle", true);
+            animation.state.timeScale = 1;
+            animation.autoUpdate = true;
+        }
+    };
+
+    private drive = () => {
         const animation = this.bus;
         if (!animation) return;
         if (animation.state.hasAnimation("drive")) {
@@ -46,11 +61,11 @@ class MainView {
             animation.state.timeScale = 1;
             animation.autoUpdate = true;
         }
-    }
+    };
 
     public update(time: number) {
-        const { road, roadContainer, oldTime } = this;
-        if (!road) return;
+        const { road, roadContainer, oldTime, isDriving } = this;
+        if (!road || !isDriving) return;
         roadContainer.transform.position.x = (-1 * (time - oldTime)) / 5;
 
         if (roadContainer.transform.position.x < -road.width) {
@@ -100,7 +115,28 @@ class MainView {
         }
     }
 
+    setViewState = (state: "hidden" | "intro" | "full") => {
+        switch (state) {
+            case "hidden":
+                this.isDriving = true;
+                this.drive();
+                break;
+            case "intro":
+                this.isDriving = true;
+                this.drive();
+                break;
+            case "full":
+                this.isDriving = false;
+                this.idle();
+                break;
+        }
+    };
+
     public destroy() {
+        MainStore.getInstance().events.off(
+            "Place:setViewState",
+            this.setViewState
+        );
         this.symbol.destroy();
     }
 }

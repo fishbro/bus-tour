@@ -11,6 +11,9 @@ const placesConf: PlaceDesc[] = [
         title: "Welcome!"
     },
     {
+        title: "This is a fantastic bus tour!"
+    },
+    {
         title: "Traditional village",
         descTitle: "Lorem ipsum dolor sit amet",
         text:
@@ -71,7 +74,7 @@ class Viewer extends Component<any, any> {
         this.timer = setTimeout(() => {
             console.log("Place: showDescription");
             MainStore.getInstance().events.emit("Place:setViewState", "full");
-        }, 1000);
+        }, 2000);
     };
 
     onNext = () => {
