@@ -4,68 +4,119 @@ import React, { Component } from "react";
 import styles from "./place.module.scss";
 import MainStore from "@/app/modules/store/MainStore";
 
-class Place extends Component<any, any> {
-    styles = {};
+export type PlaceDesc = {
+    title: string;
+    descTitle?: string;
+    text?: string;
+    photos?: string[];
+};
+
+type IState = {
+    place?: PlaceDesc;
+    dimensions: React.CSSProperties;
+    state: "hidden" | "intro" | "full";
+};
+
+class Place extends Component<{ place?: PlaceDesc }, IState> {
+    constructor(props: { place?: PlaceDesc }) {
+        super(props);
+
+        this.state = {
+            place: props.place,
+            dimensions: {},
+            state: "hidden"
+        };
+    }
 
     componentDidMount() {
         MainStore.getInstance().events.on("MainLayer:BusSize", this.setSize);
+        MainStore.getInstance().events.on(
+            "Place:setViewState",
+            this.setViewState
+        );
     }
 
     componentWillUnmount() {
         MainStore.getInstance().events.off("MainLayer:BusSize", this.setSize);
+        MainStore.getInstance().events.off(
+            "Place:setViewState",
+            this.setViewState
+        );
     }
 
+    componentDidUpdate(
+        prevProps: Readonly<{ place?: PlaceDesc }>,
+        prevState: Readonly<{}>,
+        snapshot?: any
+    ) {
+        if (prevProps.place !== this.props.place) {
+            this.setState({ place: this.props.place });
+        }
+    }
+
+    setViewState = (state: "hidden" | "intro" | "full") => {
+        const { place } = this.props;
+        if (
+            place &&
+            !(place.descTitle && place.text && place.photos) &&
+            state === "full"
+        )
+            return;
+        this.setState({ state });
+    };
+
     setSize = (w: number, h: number) => {
-        this.styles = {
-            width: w,
-            height: `calc(95% - ${h}px)`
-        };
-        this.forceUpdate();
+        this.setState({
+            dimensions: {
+                width: w,
+                height: `calc(95% - ${h}px)`
+            }
+        });
     };
 
     render() {
+        const { dimensions, state, place } = this.state;
+        if (!place) return null;
+
+        const hasDesc = place.descTitle && place.text && place.photos;
+
         return (
-            <div className={styles.place}>
-                <div className={styles.place__intro} style={this.styles}>
-                    <div className={styles.place__intro__phrase}>
-                        Our first stop is...
-                    </div>
+            <div className={`${styles.place} ${styles[state]}`}>
+                <div className={styles.place__intro} style={dimensions}>
+                    {hasDesc ? (
+                        <div className={styles.place__intro__phrase}>
+                            The next stop is...
+                        </div>
+                    ) : null}
                     <div className={styles.place__intro__title}>
-                        Traditional village
+                        {place.title}
                     </div>
                 </div>
-                <div className={styles.place__description}>
-                    <div className={styles.place__description__title}>
-                        Lorem ipsum dolor sit amet
+                {hasDesc ? (
+                    <div className={styles.place__description}>
+                        <div className={styles.place__description__title}>
+                            {place.descTitle}
+                        </div>
+                        <div className={styles.place__description__text}>
+                            {place.text}
+                        </div>
+                        {place.photos ? (
+                            <div className={styles.place__description__photos}>
+                                {place.photos.map((photo, i) => (
+                                    <div
+                                        key={i}
+                                        className={
+                                            styles.place__description__photos__photo
+                                        }
+                                        style={{
+                                            backgroundImage: `url(${photo})`
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        ) : null}
                     </div>
-                    <div className={styles.place__description__text}>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                        Donec euismod, nisl eget aliquam ultricies, nunc nisl
-                        ultricies nunc, eget aliquam nisl nisl eget nisl. Donec
-                        euismod, nisl eget aliquam ultricies, nunc nisl
-                        ultricies nunc, eget aliquam nisl nisl eget nisl.
-                    </div>
-                    <div className={styles.place__description__photos}>
-                        <div
-                            className={styles.place__description__photos__photo}
-                        />
-                        <div
-                            className={styles.place__description__photos__photo}
-                        />
-                        <div
-                            className={styles.place__description__photos__photo}
-                        />
-                        <div
-                            className={styles.place__description__photos__photo}
-                        />
-                        <div
-                            className={styles.place__description__photos__photo}
-                        />
-                        <div
-                            className={styles.place__description__photos__photo}
-                        />
-                    </div>
-                </div>
+                ) : null}
             </div>
         );
     }

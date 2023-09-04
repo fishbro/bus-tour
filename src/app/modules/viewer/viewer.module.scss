@@ -1,0 +1,11 @@
+.arrow {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translate(0, -50%);
+
+    &__next {
+        left: auto;
+        right: 0;
+    }
+}
