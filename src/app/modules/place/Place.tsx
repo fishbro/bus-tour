@@ -2,12 +2,31 @@
 
 import React, { Component } from "react";
 import styles from "./place.module.scss";
+import MainStore from "@/app/modules/store/MainStore";
 
 class Place extends Component<any, any> {
+    styles = {};
+
+    componentDidMount() {
+        MainStore.getInstance().events.on("MainLayer:BusSize", this.setSize);
+    }
+
+    componentWillUnmount() {
+        MainStore.getInstance().events.off("MainLayer:BusSize", this.setSize);
+    }
+
+    setSize = (w: number, h: number) => {
+        this.styles = {
+            width: w,
+            height: `calc(95% - ${h}px)`
+        };
+        this.forceUpdate();
+    };
+
     render() {
         return (
             <div className={styles.place}>
-                <div className={styles.place__intro}>
+                <div className={styles.place__intro} style={this.styles}>
                     <div className={styles.place__intro__phrase}>
                         Our first stop is...
                     </div>
